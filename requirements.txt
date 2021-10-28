@@ -1,0 +1,8 @@
+nltk
+beautifulsoup4
+lxml
+langdetect
+stop-words
+matplotlib
+wordcloud
+googletrans
