@@ -7,13 +7,12 @@ from urllib import request
 from tkinter import *
 from stop_words import get_stop_words
 from urllib.parse import quote
-from googletrans import Translator
+from deep_translator import GoogleTranslator
 from langdetect import detect
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 # INITIALIZE INTERPETER FOR TRANSLATOR AND OUR INTERFACE
-translator = Translator()
 
 root=Tk()
 root.title("TEXT SUMMARIZATION")
@@ -29,14 +28,15 @@ def summarization_from_url(response,x,y):
     article_text = ""
     for p in paragraphs:
         article_text += p.text
+
     
     # INITIAL PREPROCESSING. FORMATTING TEXT TO REMOVE IRRELEVANT CHARACTERS
-    formatted_article_text = re.sub('[!@#$%^&*]g', ' ', article_text )
+    formatted_article_text = re.sub('[!@#$%^&*]g', ' ', article_text)
     formatted_article_text = re.sub(r'\s+', ' ', formatted_article_text)
-    
+    sentence_list=nltk.tokenize.sent_tokenize(formatted_article_text)
     # TRANSLATING OUR FORMATTED ARTICLE
-    translated_formatted_article=translator.translate(formatted_article_text)
-    translated_formatted_article=translated_formatted_article.text
+    translated_formatted_article=GoogleTranslator(source='auto', target='english').translate_batch(sentence_list)
+    translated_formatted_article = ' '.join(translated_formatted_article)
    
     # LANGUAGE DETECTION
     lang = detect(formatted_article_text)
@@ -60,8 +60,6 @@ def summarization_from_url(response,x,y):
     # SPLITTING FORMATTED TEXT INTO SENTENCES AND GETTING STOPWORDS FOR SPECIFIC LANGUAGE
     
     #nltk.download('punkt')
-    from nltk.tokenize import sent_tokenize
-    sentence_list = nltk.sent_tokenize(formatted_article_text)
     #nltk.download('stopwords')
     stopwords = get_stop_words(lang)
     
@@ -103,8 +101,8 @@ def summarization_from_url(response,x,y):
     summary = ' '.join(summary_sentences)
     
     # TRANSLATING SUMMARY
-    translated_summary=translator.translate(summary)
-    translated_summary=translated_summary.text
+    translated_summary=GoogleTranslator(source='auto', target='english').translate_batch(summary_sentences)
+    translated_summary = ' '.join(translated_summary)
     
     # WRITING SUMMARY AND TRANSLATED SUMMARY INTO TEXT FILE
     f=open("summary.txt","w",encoding="utf8")
@@ -130,8 +128,10 @@ def summarization_from_url(response,x,y):
 # DEFINING ANOTHER FUNCTION TO SUMMARIZE TEXT THAT HAS BEEN PUT INSIDE TEXTBOX. WE USE SAME TECHNIQUES AS IN PREVIOUS FUNCTION
 def summarization_from_text(text,x,y):
    
-    translated_text=translator.translate(text)
-    translated_text=translated_text.text
+    sentence_list=nltk.tokenize.sent_tokenize(text)
+    # TRANSLATING OUR FORMATTED ARTICLE
+    translated_text=GoogleTranslator(source='auto', target='english').translate_batch(sentence_list)
+    translated_text = ' '.join(translated_text)
     
 
     lang = detect(text)
@@ -154,11 +154,8 @@ def summarization_from_text(text,x,y):
     
     
     #nltk.download('punkt')
-    from nltk.tokenize import sent_tokenize
-    sentence_list = nltk.sent_tokenize(text)
     #nltk.download('stopwords')
     stopwords = get_stop_words(lang)
-    
    
     word_frequencies = {}
     for word in nltk.word_tokenize(text):
@@ -186,13 +183,11 @@ def summarization_from_text(text,x,y):
     import heapq
     threshold = y
     summary_sentences = heapq.nlargest(threshold, sentence_scores, key=sentence_scores.get)
-    
-    
     summary = ' '.join(summary_sentences)
     
     
-    translated_summary=translator.translate(summary)
-    translated_summary=translated_summary.text
+    translated_summary=GoogleTranslator(source='auto', target='english').translate_batch(summary_sentences)
+    translated_summary = ' '.join(translated_summary)
     
     
     f=open("summary.txt","w",encoding="utf8")
@@ -217,7 +212,7 @@ def summarization_from_text(text,x,y):
 # MAKING GUI INTERFACE
 
 # CREATING LABEL WITH TEXT AND PLACING IT IN SPECIFIC PLACE
-welcome_label=Label(root,text="Hello input URL here or copy your text into textbox:")
+welcome_label=Label(root,text="Input URL here or copy your text into textbox:")
 welcome_label.grid(row=0,column=1,columnspan=2)
 
 # CREATING PLACE TO PUT URL
@@ -348,8 +343,8 @@ def wrdcloud_summary():
     plt.figure(figsize=(7,7))
     plt.imshow(result[5])
     plt.axis("off")
-    plt.savefig("word cloud from summary"+".png", bbox_inches='tight')
-    plt.gcf().canvas.set_window_title('WORD CLOUD FROM SUMMARY')
+    plt.savefig("word_cloud_summary.png", bbox_inches='tight')
+    plt.gcf().canvas.draw()
     plt.show()
     plt.close()
 
@@ -358,8 +353,8 @@ def wrdcloud_article():
     plt.figure(figsize=(7,7))
     plt.imshow(result[6])
     plt.axis("off")
-    plt.savefig("word cloud from article"+".png", bbox_inches='tight')
-    plt.gcf().canvas.set_window_title('WORD CLOUD FROM ARTICLE')
+    plt.savefig("word_cloud_article.png", bbox_inches='tight')
+    plt.gcf().canvas.draw()
     plt.show()
     plt.close()
 

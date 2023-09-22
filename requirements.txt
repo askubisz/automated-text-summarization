@@ -5,4 +5,5 @@ langdetect
 stop-words
 matplotlib
 wordcloud
-googletrans
+deep-translator
+requests
